@@ -1,15 +1,15 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.text import slugify
-from unidecode import unidecode
 
 from blog_api.abstract_models import AbstractNameSlug, AbstractCreatedUpdated
 
-PLACE_TYPE_PHOTO = '0'
-PLACE_TYPE_ARTICLE = '1'
-PLACE_TYPE_MIXED = '2'
+PLACE_TYPE_NONE = '0'
+PLACE_TYPE_PHOTO = '1'
+PLACE_TYPE_ARTICLE = '2'
+PLACE_TYPE_MIXED = '3'
 
 PLACE_TYPES = (
+    (PLACE_TYPE_NONE, _('None')),
     (PLACE_TYPE_PHOTO, _('Photo')),
     (PLACE_TYPE_ARTICLE, _('Article')),
     (PLACE_TYPE_MIXED, _('Mixed')),
@@ -40,7 +40,8 @@ class Place(AbstractNameSlug, AbstractCreatedUpdated):
     type = models.CharField(
         verbose_name=_('Place type'),
         max_length=1,
-        choices=PLACE_TYPES
+        choices=PLACE_TYPES,
+        default=PLACE_TYPE_NONE
     )
 
     class Meta:
