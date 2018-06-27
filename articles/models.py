@@ -1,20 +1,17 @@
-from datetime import datetime
+import re
+
+from django.utils import timezone
 from django.utils.html import strip_tags
 from django.db import models
 from blog_api.abstract_models import AbstractCreatedUpdated, AbstractNameSlug
 from django.utils.translation import ugettext_lazy as _
-from places.models import PLACE_TYPE_PHOTO, PLACE_TYPE_ARTICLE
-
-ARTICLE_TYPES = (
-    (PLACE_TYPE_ARTICLE, _('Article')),
-    (PLACE_TYPE_PHOTO, _('Photo')),
-)
+from articles.settings import ARTICLE_TYPES, PLACE_TYPE_PHOTO, PLACE_TYPE_ARTICLE
 
 
 class Article(AbstractNameSlug, AbstractCreatedUpdated):
     date = models.DateTimeField(
         verbose_name=_('Date'),
-        default=datetime.now,
+        default=timezone.now,
         blank=True
     )
 
@@ -50,7 +47,8 @@ class Article(AbstractNameSlug, AbstractCreatedUpdated):
         verbose_name_plural = _('Articles')
 
     def save(self, *args, **kwargs):
-        self.content_short = strip_tags(self.content)[:140]
+        content_short = re.sub(r'[\n\r]+', ' ', strip_tags(self.content)[:140])
+        self.content_short = re.sub(r' +', ' ', content_short)
         self.type = self.get_identified_type()
         super().save(*args, **kwargs)
 

@@ -1,19 +1,13 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from places.settings import PLACE_TYPE_NONE, PLACE_TYPES
+from articles.models import Article
 from blog_api.abstract_models import AbstractNameSlug, AbstractCreatedUpdated
 
-PLACE_TYPE_NONE = '0'
-PLACE_TYPE_PHOTO = '1'
-PLACE_TYPE_ARTICLE = '2'
-PLACE_TYPE_MIXED = '3'
 
-PLACE_TYPES = (
-    (PLACE_TYPE_NONE, _('None')),
-    (PLACE_TYPE_PHOTO, _('Photo')),
-    (PLACE_TYPE_ARTICLE, _('Article')),
-    (PLACE_TYPE_MIXED, _('Mixed')),
-)
+class PlaceManager(models.Manager):
+    pass
 
 
 class Place(AbstractNameSlug, AbstractCreatedUpdated):
@@ -44,6 +38,11 @@ class Place(AbstractNameSlug, AbstractCreatedUpdated):
         default=PLACE_TYPE_NONE
     )
 
+    objects = PlaceManager()
+
     class Meta:
         verbose_name = _('Place')
         verbose_name_plural = _('Places')
+
+    def get_articles(self):
+        return Article.objects.filter(place=self)

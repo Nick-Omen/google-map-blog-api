@@ -1,5 +1,6 @@
 from django.test import TestCase
 from places.models import Place
+from articles.models import Article
 
 
 class PlaceTestCase(TestCase):
@@ -43,3 +44,10 @@ class PlaceTestCase(TestCase):
         place.save()
         self.assertNotEqual(slug_old, place.slug)
         self.assertEqual(place.slug, 'new-title-should-update-slug')
+
+    def test_get_articles_by_place(self):
+        place = Place.objects.last()
+        article = Article.objects.create(name='Trip to the Ocean',
+                                         place=place)
+        place_articles = place.get_articles()
+        self.assertQuerysetEqual(place_articles, [repr(a) for a in Article.objects.filter(pk=article.pk)])
