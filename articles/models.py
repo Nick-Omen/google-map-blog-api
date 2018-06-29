@@ -42,6 +42,21 @@ class Article(AbstractNameSlug, AbstractCreatedUpdated):
         default=PLACE_TYPE_ARTICLE
     )
 
+    main_image = models.ForeignKey(
+        'photo.Image',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        default=None,
+        related_name='main_image'
+    )
+
+    images = models.ManyToManyField(
+        'photo.Image',
+        verbose_name=_('Images'),
+        blank=True
+    )
+
     class Meta:
         verbose_name = _('Article')
         verbose_name_plural = _('Articles')
