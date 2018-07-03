@@ -1,3 +1,9 @@
-from django.conf.urls import url, include
+from django.urls import path
+from places import views
 
-urlpatterns = ([], 'places')
+urlpatterns = (
+    [
+        path('', views.PlaceList.as_view(), name='list'),
+    ],
+    'places'
+)

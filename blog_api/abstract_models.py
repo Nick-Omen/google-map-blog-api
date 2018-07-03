@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.template import defaultfilters
 from django.utils import formats
@@ -45,11 +46,11 @@ class AbstractCreatedUpdated(models.Model):
 
     @property
     def created_at_formatted(self):
-        return formats.date_format(self.created_at, 'SHORT_DATETIME_FORMAT')
+        return formats.date_format(self.created_at, settings.DATETIME_FORMAT)
 
     @property
     def updated_at_formatted(self):
-        return formats.date_format(self.created_at, 'SHORT_DATETIME_FORMAT')
+        return formats.date_format(self.updated_at, settings.DATETIME_FORMAT)
 
     class Meta:
         abstract = True
