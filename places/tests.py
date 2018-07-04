@@ -57,6 +57,7 @@ class PlaceTestCase(TestCase):
 
 
 class PlaceAPITestCase(APITestCase):
+    created_ids = list()
 
     def test_get_places(self):
         response = self.client.get('/places/')
@@ -74,6 +75,7 @@ class PlaceAPITestCase(APITestCase):
         self.assertEqual(response.data['name'], data['name'])
         self.assertEqual(response.data['latitude'], data['latitude'])
         self.assertEqual(response.data['longitude'], data['longitude'])
+        self.created_ids.append(response.data['id'])
 
     def test_create_place_empty_name(self):
         data = {
@@ -114,3 +116,81 @@ class PlaceAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(isinstance(response.data['latitude'], list))
         self.assertTrue(isinstance(response.data['longitude'], list))
+
+    def test_delete_place_bulk(self):
+        p = Place.objects.create(name='name',
+                                 latitude=42,
+                                 longitude=74)
+        self.created_ids.append(p.pk)
+        response = self.client.delete('/places/', {
+            'ids': self.created_ids
+        })
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        place_ids = Place.objects.all().values_list('pk', flat=True)
+        for pk in self.created_ids:
+            self.assertFalse(pk in place_ids)
+
+    def test_get_place_details(self):
+        p = Place.objects.create(name='name',
+                                 latitude=42,
+                                 longitude=74)
+        response = self.client.get('/places/%d/' % p.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], p.pk)
+        self.assertEqual(response.data['name'], p.name)
+        self.assertEqual(response.data['latitude'], p.latitude)
+        self.assertEqual(response.data['longitude'], p.longitude)
+
+    def test_get_not_created_place_details(self):
+        response = self.client.get('/places/999999/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_place(self):
+        p = Place.objects.create(name='name',
+                                 latitude=42,
+                                 longitude=74)
+        new_data = {
+            'name': 'new name',
+            'latitude': 74.124123,
+            'longitude': 42.412512,
+        }
+        response = self.client.put('/places/%d/' % p.pk, new_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], p.pk)
+        self.assertNotEqual(response.data['name'], p.name)
+        self.assertNotEqual(response.data['latitude'], p.latitude)
+        self.assertNotEqual(response.data['longitude'], p.longitude)
+        self.assertEqual(response.data['name'], new_data['name'])
+        self.assertEqual(response.data['latitude'], new_data['latitude'])
+        self.assertEqual(response.data['longitude'], new_data['longitude'])
+
+    def test_update_place_with_patch_data(self):
+        p = Place.objects.create(name='name',
+                                 latitude=42,
+                                 longitude=74)
+        new_data = {
+            'name': 'new name'
+        }
+        response = self.client.put('/places/%d/' % p.pk, new_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_patch_place(self):
+        p = Place.objects.create(name='name',
+                                 latitude=42,
+                                 longitude=74)
+        new_data = {
+            'name': 'new name'
+        }
+        response = self.client.patch('/places/%d/' % p.pk, new_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], p.pk)
+        self.assertEqual(response.data['name'], new_data['name'])
+
+    def test_delete_place(self):
+        p = Place.objects.create(name='name',
+                                 latitude=42,
+                                 longitude=74)
+        response = self.client.delete('/places/%d/' % p.pk)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        p = Place.objects.filter(pk=p.pk).first()
+        self.assertIsNone(p)
