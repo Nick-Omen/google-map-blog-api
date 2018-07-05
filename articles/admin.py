@@ -3,7 +3,7 @@ from articles.models import Article
 
 
 class ArticleAdmin(admin.ModelAdmin):
-    exclude = ['slug']
+    exclude = ['slug', 'short_content', 'type']
 
 
 admin.site.register(Article, ArticleAdmin)

@@ -18,8 +18,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from places.urls import urlpatterns as places_urls
+from articles.urls import urlpatterns as articles_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('places/', include(places_urls, namespace='places')),
+    path('articles/', include(articles_urls, namespace='articles')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

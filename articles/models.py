@@ -1,5 +1,7 @@
 import re
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.db import models
@@ -71,3 +73,17 @@ class Article(AbstractNameSlug, AbstractCreatedUpdated):
         if self.content and len(self.content) > 0:
             return PLACE_TYPE_ARTICLE
         return PLACE_TYPE_PHOTO
+
+    def get_main_image_url(self):
+        return self.main_image.get_original_url()
+
+    def get_thumbnail_url(self):
+        return self.main_image.get_thumbnail_url()
+
+    def get_thumbnail2x_url(self):
+        return self.main_image.get_thumbnail2x_url()
+
+
+@receiver(post_save, sender=Article)
+def article_saved(sender, instance, **kwargs):
+    instance.place.update_type()

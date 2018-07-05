@@ -6,6 +6,8 @@ import mimetypes
 import logging
 
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from blog_api.abstract_models import AbstractCreatedUpdated
 from django.utils.deconstruct import deconstructible
@@ -96,7 +98,7 @@ class Image(AbstractCreatedUpdated):
         super().save(force_update=force_update)
 
     def create_thumbnails(self):
-        if not self.original :
+        if not self.original:
             return
 
         try:
@@ -153,7 +155,7 @@ class Image(AbstractCreatedUpdated):
             logger = logging.getLogger('photo.models.image')
             logger.error(e)
 
-    def delete(self, **kwargs):
+    def clean_files(self):
         if self.original and hasattr(self.original, 'path') and os.path.exists(self.original.path):
             os.remove(self.original.path)
 
@@ -162,7 +164,11 @@ class Image(AbstractCreatedUpdated):
 
         if self.thumbnail2x and hasattr(self.thumbnail2x, 'path') and os.path.exists(self.thumbnail2x.path):
             os.remove(self.thumbnail2x.path)
-        super().delete(**kwargs)
+
+    def get_original_url(self):
+        if self.original:
+            return self.original.url
+        return ''
 
     def get_thumbnail_url(self):
         if self.thumbnail:
@@ -178,7 +184,7 @@ class Image(AbstractCreatedUpdated):
             return self.original.url
         return ''
 
-    def get_original_url(self):
-        if self.original:
-            return self.original.url
-        return ''
+
+@receiver(pre_delete, sender=Image)
+def article_saved(sender, instance, **kwargs):
+    instance.clean_files()
