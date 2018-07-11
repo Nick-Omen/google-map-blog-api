@@ -22,12 +22,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
 
 class ArticleDetailsSerializer(serializers.ModelSerializer):
     place = PlaceSerializer(read_only=True)
-    main_image = ImageSerializer(read_only=True)
     images = ImageSerializer(read_only=True, many=True)
 
     class Meta:
         model = Article
-        exclude = ['content_short']
+        fields = '__all__'
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)

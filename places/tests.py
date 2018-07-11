@@ -26,12 +26,12 @@ class PlaceTestCase(TestCase):
             'long-name-longer-then-slug-lengt'
         ]
         for place in Place.objects.all():
-            self.assertTrue(place.slug != '')
+            self.assertIsNot(place.slug, '')
             self.assertEqual(place.slug, slugs.pop(0))
 
     def test_created_at_exists(self):
         for place in Place.objects.all():
-            self.assertTrue(place.created_at != '')
+            self.assertIsNot(place.created_at, '')
 
     def test_updated_at_changed(self):
         place = Place.objects.first()

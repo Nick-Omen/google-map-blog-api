@@ -83,6 +83,12 @@ class Article(AbstractNameSlug, AbstractCreatedUpdated):
     def get_thumbnail2x_url(self):
         return self.main_image.get_thumbnail2x_url()
 
+    def set_main_image(self):
+        first_image = self.images.order_by('-order').first()
+        if first_image is not None:
+            self.main_image = first_image
+            self.save(update_fields=['main_image'])
+
 
 @receiver(post_save, sender=Article)
 def article_saved(sender, instance, **kwargs):
