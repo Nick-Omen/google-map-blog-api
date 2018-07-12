@@ -88,14 +88,14 @@ class Image(AbstractCreatedUpdated):
         verbose_name_plural = _('Images')
 
     def save(self, *args, **kwargs):
-        self.create_thumbnails()
-
         force_update = False
 
-        if self.id:
-            force_update = True
+        if ('update_fields' in kwargs and 'original' in kwargs['update_fields']) or 'update_fields' not in kwargs:
+            self.create_thumbnails()
+            if self.id:
+                force_update = True
 
-        super().save(force_update=force_update)
+        super().save(*args, force_update=force_update, **kwargs)
 
     def create_thumbnails(self):
         if not self.original:
