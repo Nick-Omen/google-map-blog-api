@@ -17,11 +17,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_jwt.views import obtain_jwt_token
+
 from places.urls import urlpatterns as places_urls
 from articles.urls import urlpatterns as articles_urls
+from my_jwt.views import verify_jwt_token, refresh_jwt_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/obtain-token/', obtain_jwt_token),
+    path('auth/verify-token/', verify_jwt_token),
+    path('auth/refresh-token/', refresh_jwt_token),
     path('places/', include(places_urls, namespace='places')),
     path('articles/', include(articles_urls, namespace='articles')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
